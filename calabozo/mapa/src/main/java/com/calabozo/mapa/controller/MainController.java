@@ -1,11 +1,10 @@
 package com.calabozo.mapa.controller;
 
-import org.slf4j.Logger;
+import java.security.Principal;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,44 +16,52 @@ import com.calabozo.mapa.repository.UserRepository;
 @Controller
 public class MainController {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final Logger logger = LoggerFactory.getLogger(MainController.class);
 
-    Logger logger = LoggerFactory.getLogger(MainController.class);
+    public MainController(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @GetMapping("/")
     public String home() {
-        logger.info("Cargando la web principial");
-        logger.error("Es un mensaje de tipo errro ");
-        System.out.println("Entra en la ruta princial");
+        logger.info("Cargando la web principal");
+        System.out.println("Entra en la ruta principal");
         return "home";
     }
 
     @GetMapping("/login")
     public String login() {
-
-        logger.info("Intentando logearnos");
+        logger.info("Mostrando página de login");
         return "login";
     }
 
+    /**
+     * Dashboard SIN OAuth:
+     * - Principal.getName() devuelve el usuario autenticado (username).
+     * - Si tu username es un email, puedes buscar el usuario en BD por email.
+     */
     @GetMapping("/dashboard")
-    public String dashboard(@AuthenticationPrincipal OAuth2User principal, Model model) {
+    public String dashboard(Principal principal, Model model) {
         if (principal != null) {
-            String email = principal.getAttribute("email");
-            User user = userRepository.findByEmail(email).orElse(null);
+            String username = principal.getName(); // normalmente el "username"
+            User user = userRepository.findByEmail(username).orElse(null);
 
-            model.addAttribute("name", principal.getAttribute("name"));
-            model.addAttribute("email", email);
-            model.addAttribute("picture", principal.getAttribute("picture"));
+            model.addAttribute("username", username);
             model.addAttribute("user", user);
         }
         return "dashboard";
     }
 
+    /**
+     * Profile SIN OAuth:
+     * - Muestra nombre + roles (authorities)
+     */
     @GetMapping("/profile")
-    public String profile(@AuthenticationPrincipal OAuth2User principal, Model model) {
-        if (principal != null) {
-            model.addAttribute("attributes", principal.getAttributes());
+    public String profile(Authentication authentication, Model model) {
+        if (authentication != null) {
+            model.addAttribute("username", authentication.getName());
+            model.addAttribute("roles", authentication.getAuthorities());
         }
         return "profile";
     }

@@ -157,4 +157,17 @@ public class cityController {
 
     }
 
+    @GetMapping("/{id}")
+    public String detalleCity(@PathVariable Long id, Model model, RedirectAttributes redAttrib) {
+
+        if (!ciudadRepository.existsById(id)) {
+        redAttrib.addFlashAttribute("error", "La ciudad no Existe");
+        return "redirect:/ciudades";
+        }
+
+    Ciudad ciudad = ciudadRepository.findById(id).get();
+    model.addAttribute("ciudad", ciudad);
+
+    return "detalleCiudad";
+    }
 }
