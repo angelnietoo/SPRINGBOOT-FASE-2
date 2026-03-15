@@ -25,9 +25,8 @@ public class MainController {
 
     @GetMapping("/")
     public String home() {
-        logger.info("Cargando la web principal");
-        System.out.println("Entra en la ruta principal");
-        return "home";
+        logger.info("Cargando ListaCiudades como página principal");
+        return "ListaCiudades";
     }
 
     @GetMapping("/login")
@@ -36,15 +35,10 @@ public class MainController {
         return "login";
     }
 
-    /**
-     * Dashboard SIN OAuth:
-     * - Principal.getName() devuelve el usuario autenticado (username).
-     * - Si tu username es un email, puedes buscar el usuario en BD por email.
-     */
     @GetMapping("/dashboard")
     public String dashboard(Principal principal, Model model) {
         if (principal != null) {
-            String username = principal.getName(); // normalmente el "username"
+            String username = principal.getName();
             User user = userRepository.findByEmail(username).orElse(null);
 
             model.addAttribute("username", username);
@@ -53,10 +47,6 @@ public class MainController {
         return "dashboard";
     }
 
-    /**
-     * Profile SIN OAuth:
-     * - Muestra nombre + roles (authorities)
-     */
     @GetMapping("/profile")
     public String profile(Authentication authentication, Model model) {
         if (authentication != null) {

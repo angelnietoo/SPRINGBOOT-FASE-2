@@ -9,7 +9,6 @@ import org.springframework.security.web.SecurityFilterChain;
 /**
  * Configuración de seguridad de la aplicación Spring Boot.
  *
- * OAuth2 ELIMINADO.
  * - Se mantienen rutas públicas.
  * - El resto requiere autenticación con login normal (formLogin).
  */
@@ -20,12 +19,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // CSRF: si tienes endpoints /api/**, se ignora CSRF solo ahí
             .csrf(csrf -> csrf
                 .ignoringRequestMatchers("/api/**")
             )
 
-            // Autorización de rutas
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers(
                     "/api/ciudades/**",
@@ -40,13 +37,11 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
 
-            // Login normal (sin OAuth)
             .formLogin(form -> form
-                .loginPage("/login")   // si tienes una vista /login personalizada
+                .loginPage("/login")
                 .permitAll()
             )
 
-            // Logout
             .logout(logout -> logout
                 .logoutSuccessUrl("/")
                 .permitAll()
